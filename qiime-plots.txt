@@ -1,0 +1,203 @@
+cd /projects/p31966/
+
+
+
+
+qiime feature-table summarize \
+  --i-table GMTOLsongBird_tablef.qza \
+  --o-visualization aves_table.qzv \
+  --m-sample-metadata-file aves_project_metadata_txt.txt
+
+qiime feature-table tabulate-seqs \
+  --i-data emma-aligned-rep-seqs.qza \
+  --o-visualization rep-seqs.qzv
+
+
+
+### Table to txt file
+qiime tools export \
+  --input-path GMTOLsong_taxonomy.qza \
+  --output-path exported_table
+
+biom convert \
+  -i feature-table.biom \
+  -o feature-table.txt \
+  --to-tsv
+
+
+### Create Visualizations
+# Filter the feature table to include only samples present in the metadata file
+qiime feature-table filter-samples \
+  --i-table GMTOLsongBird_tablef.qza \
+  --m-metadata-file aves_project_metadata_txt.txt \
+  --o-filtered-table filtered_GMTOLsongBird_tablef.qza
+
+# Generate core metrics
+qiime diversity core-metrics-phylogenetic \
+    --i-phylogeny GMTOLsong_rooted_treef.qza \
+    --i-table filtered_GMTOLsongBird_tablef.qza \
+    --p-sampling-depth 1000 \
+    --m-metadata-file aves_project_metadata_txt.txt \
+    --output-dir diversity-core-metrics-phylogenetic
+
+
+
+### Filter Table to have only Regions V3-V4 and V4
+# Get filtered table WITHOUT the V1-V3 samples
+qiime feature-table filter-samples \
+  --i-table GMTOLsongBird_tablef.qza \
+  --m-metadata-file aves_project_metadata_txt.txt \
+  --p-where "[16S515F-806R]='V1-V3'" \
+  --p-exclude-ids \
+  --o-filtered-table Aves_filtered_table.qza
+
+
+### Split tables on Region
+# Get filtered V3-V4 table 
+ qiime feature-table filter-samples \
+  --i-table Aves_filtered_table.qza \
+  --m-metadata-file aves_project_metadata_txt.txt \
+  --p-where "[16S515F-806R]='V3-V4'" \
+  --o-filtered-table split/V3_V4_filtered_table.qza
+
+# Get filtered V4 table 
+  qiime feature-table filter-samples \
+  --i-table Aves_filtered_table.qza \
+  --m-metadata-file aves_project_metadata_txt.txt \
+  --p-where "[16S515F-806R]='V4'" \
+  --o-filtered-table split/V4_filtered_table.qza
+
+
+
+### Core metrics for each Region
+#  V3-V4 Core Metrics
+qiime diversity core-metrics-phylogenetic \
+    --i-phylogeny GMTOLsong_rooted_treef.qza  \
+    --i-table V3_V4_filtered_table.qza \
+    --p-sampling-depth 1000 \
+    --m-metadata-file aves_project_metadata_txt.txt \
+    --output-dir split/v3_v4_diversity-core-metrics-phylogenetic
+
+# V4 Core Metrics
+qiime diversity core-metrics-phylogenetic \
+    --i-phylogeny GMTOLsong_rooted_treef.qza  \
+    --i-table V4_filtered_table.qza \
+    --p-sampling-depth 1000 \
+    --m-metadata-file aves_project_metadata_txt.txt \
+    --output-dir split/v4_diversity-core-metrics-phylogenetic
+
+
+
+
+### Group on Order
+qiime feature-table group \
+--i-table Aves_filtered_table.qza \
+--p-axis sample \
+--m-metadata-file aves_project_metadata_txt.txt \
+--m-metadata-column Order \
+--p-mode sum \
+--o-grouped-table Aves_table_groupedClass.qza
+
+### Generate Taxa Barplot by Order
+qiime taxa barplot \
+  --i-table Aves_table_groupedClass.qza \
+  --i-taxonomy GMTOLsong_taxonomy.qza \
+  --o-visualization taxabarplot_Aves_groupedOrder.qzv
+
+
+
+
+
+
+
+############## MISC ##############
+
+
+qiime diversity alpha-group-significance \
+  --i-alpha-diversity diversity-core-metrics-phylogenetic/faith_pd_vector.qza \
+  --m-metadata-file GMTOL_metadata2.txt \
+  --o-visualization 7_9_pic/faith-pd-group-significance.qzv
+
+qiime diversity alpha-group-significance \
+  --i-alpha-diversity diversity-core-metrics-phylogenetic/evenness_vector.qza \
+  --m-metadata-file GMTOL_metadata2.txt \
+  --o-visualization 7_9_pic/evenness-group-significance.qzv
+
+
+qiime diversity alpha-rarefaction \
+    --i-table Emma_Aves_table2.qza \
+    --i-phylogeny GMTOL_rooted_tree2.qza \
+    --p-max-depth 6000 \
+    --m-metadata-file GMTOL_metadata2.txt \
+    --o-visualization 7_9_pic/alpha-rarefaction.qzv
+
+
+qiime diversity beta-group-significance \
+  --i-distance-matrix diversity-core-metrics-phylogenetic/unweighted_unifrac_distance_matrix.qza \
+  --m-metadata-file GMTOL_metadata2.txt \
+  --m-metadata-column body-site \
+  --p-pairwise \
+  --o-visualization 7_9_pic/unweighted-unifrac-body-site-group-significance.qzv
+
+qiime taxa barplot \
+  --i-table  Emma_Aves_table2.qza \
+  --i-taxonomy GMTOL_taxonomy2.qza \
+  --m-metadata-file GMTOL_metadata2.txt \
+  --o-visualization 7_9_pic/aves-taxa-bar-plots.qzv
+
+  
+qiime diversity beta-group-significance \
+  --i-distance-matrix diversity-core-metrics-phylogenetic/unweighted_unifrac_distance_matrix.qza \
+  --m-metadata-file GMTOL_metadata2.txt \
+  --m-metadata-column subject \
+  --p-pairwise \
+  --o-visualization 7_9_pic/unweighted-unifrac-subject-group-significance.qzv
+
+
+# Alpha Faith V3-V4
+qiime diversity alpha-group-significance \
+  --i-alpha-diversity split/v3_v4_diversity-core-metrics-phylogenetic/faith_pd_vector.qza \
+  --m-metadata-file GMTOL_metadata.txt \
+  --o-visualization split/v3_v4_faith-pd-group-significance.qzv
+
+# Alpha Faith V4
+qiime diversity alpha-group-significance \
+  --i-alpha-diversity split/v4_diversity-core-metrics-phylogenetic/faith_pd_vector.qza \
+  --m-metadata-file GMTOL_metadata.txt \
+  --o-visualization split/v4_faith-pd-group-significance.qzv
+
+qiime diversity alpha-group-significance \
+  --i-alpha-diversity split/diversity-core-metrics-phylogenetic/evenness_vector.qza \
+  --m-metadata-file GMTOL_metadata2.txt \
+  --o-visualization split/evenness-group-significance.qzv
+
+qiime diversity alpha-rarefaction \
+    --i-table Emma_Aves_table2.qza \
+    --i-phylogeny GMTOL_rooted_tree2.qza \
+    --p-max-depth 6000 \
+    --m-metadata-file GMTOL_metadata2.txt \
+    --o-visualization split/alpha-rarefaction.qzv
+
+qiime diversity beta-group-significance \
+  --i-distance-matrix split/diversity-core-metrics-phylogenetic/unweighted_unifrac_distance_matrix.qza \
+  --m-metadata-file GMTOL_metadata2.txt \
+  --m-metadata-column body-site \
+  --p-pairwise \
+  --o-visualization split/unweighted-unifrac-body-site-group-significance.qzv
+
+
+  
+
+qiime taxa barplot \
+  --i-table Emma_Aves_table2.qza \
+  --i-taxonomy GMTOL_taxonomy2.qza \
+  --o-visualization split/aves-taxa-bar-plots.qzv
+  
+qiime diversity beta-group-significance \
+  --i-distance-matrix split/diversity-core-metrics-phylogenetic/unweighted_unifrac_distance_matrix.qza \
+  --m-metadata-file GMTOL_metadata2.txt \
+  --m-metadata-column subject \
+  --p-pairwise \
+  --o-visualization split/unweighted-unifrac-subject-group-significance.qzv
+
+

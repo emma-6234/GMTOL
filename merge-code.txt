@@ -1,0 +1,14 @@
+qiime feature-table merge \
+--i-tables table-bornbusch.qza \
+--i-tables chen-rename-table.qza \
+--i-tables table-gonzalez-serrano.qza \
+--i-tables table-kim.qza \
+--i-tables table-mendoza-guido.qza \
+--i-tables monteiro-table.qza \
+--i-tables okamoto-table.qza \
+--i-tables Smith-table.qza \
+--i-tables tong-single-table.qza \
+--i-tables table-wang.qza \
+--i-tables yanez-montalvo-paired-table.qza \
+--i-tables zoqratt-single-table.qza \
+--o-merged-table emmasmith_merged_tables.qza

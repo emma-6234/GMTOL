@@ -1,0 +1,14 @@
+qiime feature-table merge-seqs \
+--i-data chen-rep-seqs.qza \
+--i-data monteiro-rep-seqs.qza \
+--i-data okamoto-rep-seqs.qza \
+--i-data rep-seqs-dada-bornbusch.qza \
+--i-data rep-seqs-dada-gonzalez-serrano.qza \
+--i-data rep-seqs-dada-kim.qza \
+--i-data rep-seqs-dada-mendoza-guido.qza \
+--i-data rep-seqs-dada-wang.qza \
+--i-data Smith-rep-seqs.qza \
+--i-data tong-single-rep-seqs.qza \
+--i-data yanez-montalvo-paired-rep-seqs.qza \
+--i-data zoqratt-single-rep-seqs.qza \
+--o-merged-data emmasmith_merged_repseqs.qza

@@ -1,0 +1,12 @@
+qiime feature-table group \
+--i-table Emma_Aves_tableMay30.qza \
+--p-axis sample \
+--m-metadata-file GMTOL_FINAL_METADATA.txt \
+--m-metadata-column Order \
+--p-mode sum \
+--o-grouped-table merged_table_Jun8_Aves_groupedClass.qza
+
+qiime taxa barplot \
+  --i-table merged_table_Jun8_Aves_groupedClass.qza \
+  --i-taxonomy merged_GMTOL_taxonomy.qza \
+  --o-visualization taxabarplot_Jun8_Aves_groupedOrder.qzv
